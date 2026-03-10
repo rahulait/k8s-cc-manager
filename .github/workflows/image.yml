@@ -16,21 +16,15 @@
 name: Image
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
-    branches:
-      - main
-      - release-*
   push:
     branches:
       - main
       - release-*
+      - "pull-request/[0-9]+"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: linux-amd64-cpu4
     strategy:
       matrix:
         dist: [distroless]
@@ -66,6 +60,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Go Proxy
+        id: setup-go-proxy
+        uses: nv-gha-runners/setup-artifactory-go-proxy@main
       - name: Build image
         env:
           IMAGE_NAME: ghcr.io/${LOWERCASE_REPO_OWNER}/k8s-cc-manager
